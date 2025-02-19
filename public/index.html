@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Chat</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #messages { list-style: none; padding: 0; max-width: 400px; margin: auto; }
+        #messages li { padding: 8px; background: #f3f3f3; margin: 5px; border-radius: 5px; }
+        input, select { padding: 10px; width: 80%; margin: 10px 0; }
+        button { padding: 10px; }
+    </style>
+</head>
+<body>
+    <h2>Student Chat</h2>
+
+    <label for="groupSelect">Choose a Subject Group:</label>
+    <select id="groupSelect">
+        <option value="Machine Learning">Machine Learning</option>
+        <option value="Data Structures">Data Structures</option>
+        <option value="Cyber Security">Cyber Security</option>
+    </select>
+    <button onclick="joinGroup()">Join Group</button>
+
+    <p id="status"></p>
+
+    <ul id="messages"></ul>
+    <input id="messageInput" placeholder="Type a message..." disabled>
+    <button id="sendButton" onclick="sendMessage()" disabled>Send</button> <!-- Added ID -->
+
+    <script>
+        const socket = io();
+        let selectedGroup = "";
+
+        function joinGroup() {
+            selectedGroup = document.getElementById("groupSelect").value;
+            socket.emit("join group", selectedGroup);
+        }
+
+        // Enable input and Send button after joining a group
+        socket.on("joined group", (msg) => {
+            document.getElementById("status").textContent = msg;
+            document.getElementById("messageInput").disabled = false;
+            document.getElementById("sendButton").disabled = true; // Keep disabled until user types
+        });
+
+        // Enable "Send" button when the user types
+        document.getElementById("messageInput").addEventListener("input", function () {
+            document.getElementById("sendButton").disabled = this.value.trim() === "";
+        });
+
+        function sendMessage() {
+            const input = document.getElementById("messageInput");
+            const message = input.value.trim();
+
+            if (message) {
+                console.log(`Sending message: "${message}" to group: "${selectedGroup}"`);
+                socket.emit("chat message", { group: selectedGroup, message });
+                input.value = "";
+                document.getElementById("sendButton").disabled = true; // Disable until new input
+            }
+        }
+
+        socket.on("chat message", (data) => {
+            console.log("Received message:", data); 
+            const li = document.createElement("li");
+            li.textContent = data.message;
+            document.getElementById("messages").appendChild(li);
+        });
+
+    </script>
+</body>
+</html>
