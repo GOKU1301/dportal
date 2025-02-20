@@ -6,20 +6,62 @@
     <title>Chat App</title>
     <script src="/socket.io/socket.io.js"></script>
     <script defer src="script.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        #messages {
+            list-style-type: none;
+            padding: 0;
+            margin: 20px 0;
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        input, select, button {
+            padding: 8px;
+            margin: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #cccccc;
+        }
+    </style>
 </head>
 <body>
     <h1>Chat App</h1>
     
-    <label>Select Group:</label>
-    <select id="groupSelect">
-        <option value="Machine Learning">Machine Learning</option>
-        <option value="Data Structures">Data Structures</option>
-    </select>
-    <button onclick="joinGroup()">Join</button>
+    <div class="input-group">
+        <label>Your Name:</label>
+        <input type="text" id="usernameInput" placeholder="Enter your name" required />
+    </div>
+
+    <div class="input-group">
+        <label>Select Group:</label>
+        <select id="groupSelect">
+            <option value="Machine Learning">Machine Learning</option>
+            <option value="Data Structures">Data Structures</option>
+        </select>
+        <button onclick="joinGroup()">Join</button>
+    </div>
 
     <ul id="messages"></ul>
 
-    <input id="messageInput" type="text" placeholder="Type a message..." disabled />
-    <button onclick="sendMessage()" id="sendButton" disabled>Send</button>
+    <div class="input-group">
+        <input id="messageInput" type="text" placeholder="Type a message..." disabled />
+        <button onclick="sendMessage()" id="sendButton" disabled>Send</button>
+    </div>
 </body>
 </html>
