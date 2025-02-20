@@ -1,5 +1,5 @@
 const { getFirestore, collection, query, where, orderBy, getDocs, addDoc } = require("firebase/firestore");
-const db = require("./firebaseConfig");
+const { db } = require("./firebaseConfig");
 
 const messagesCollection = collection(db, "messages");
 
@@ -23,12 +23,13 @@ async function getMessages(group) {
     }
 }
 
-async function saveMessage(group, message, sender) {
+async function saveMessage(group, message, sender, photoURL) {
     try {
         const messageData = {
             group,
             message,
             sender,
+            photoURL,
             timestamp: new Date()
         };
         await addDoc(messagesCollection, messageData);

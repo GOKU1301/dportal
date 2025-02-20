@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat App</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script defer src="script.js"></script>
     <style>
@@ -38,30 +41,85 @@
         button:disabled {
             background-color: #cccccc;
         }
+        .profile-section {
+            display: none;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .profile-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            background-color: #4CAF50;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .message-item {
+            display: flex;
+            align-items: start;
+            margin: 10px 0;
+        }
+        .message-content {
+            margin-left: 10px;
+        }
+        .message-sender {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+        #loginSection {
+            text-align: center;
+            margin: 50px 0;
+        }
+        #chatSection {
+            display: none;
+        }
+        .google-btn {
+            background-color: #4285f4;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .google-btn:hover {
+            background-color: #357abd;
+        }
     </style>
 </head>
 <body>
-    <h1>Chat App</h1>
-    
-    <div class="input-group">
-        <label>Your Name:</label>
-        <input type="text" id="usernameInput" placeholder="Enter your name" required />
+    <div id="loginSection">
+        <h1>Welcome to Chat App</h1>
+        <button id="googleSignIn" class="google-btn" onclick="signInWithGoogle()">
+            Sign in with Google
+        </button>
     </div>
 
-    <div class="input-group">
-        <label>Select Group:</label>
-        <select id="groupSelect">
-            <option value="Machine Learning">Machine Learning</option>
-            <option value="Data Structures">Data Structures</option>
-        </select>
-        <button onclick="joinGroup()">Join</button>
-    </div>
+    <div id="chatSection">
+        <div class="profile-section" id="profileSection">
+            <div class="profile-image" id="profileImage"></div>
+            <span id="userName"></span>
+        </div>
 
-    <ul id="messages"></ul>
+        <div class="input-group">
+            <label>Select Group:</label>
+            <select id="groupSelect">
+                <option value="Machine Learning">Machine Learning</option>
+                <option value="Data Structures">Data Structures</option>
+            </select>
+            <button onclick="joinGroup()">Join</button>
+        </div>
 
-    <div class="input-group">
-        <input id="messageInput" type="text" placeholder="Type a message..." disabled />
-        <button onclick="sendMessage()" id="sendButton" disabled>Send</button>
+        <ul id="messages"></ul>
+
+        <div class="input-group">
+            <input id="messageInput" type="text" placeholder="Type a message..." disabled />
+            <button onclick="sendMessage()" id="sendButton" disabled>Send</button>
+        </div>
     </div>
 </body>
 </html>
