@@ -1,7 +1,7 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
-const { saveMessage, getMessages } = require("./server/db");
+const { saveMessage, getMessages } = require("./db");
 
 const app = express();
 const server = http.createServer(app);
