@@ -13,9 +13,18 @@ async function getMessages(group) {
         const q = query(messagesCollection, where("group", "==", group), orderBy("timestamp", "asc"));
         const snapshot = await getDocs(q);
 
-        const messages = snapshot.docs.map(doc => doc.data());
+        // Map only the fields we want to return
+        const messages = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                group: data.group,
+                message: data.message,
+                sender: data.sender,
+                timestamp: data.timestamp
+            };
+        });
+        
         console.log("Fetched messages:", messages);
-
         return messages;
     } catch (error) {
         console.error("Error fetching messages:", error);
@@ -23,19 +32,27 @@ async function getMessages(group) {
     }
 }
 
-async function saveMessage(group, message, sender, photoURL) {
+async function saveMessage(group, message, sender) {
+    if (!group || !message || !sender) {
+        console.error("Missing required fields for saving message");
+        throw new Error("Missing required fields");
+    }
+
     try {
+        // Explicitly create message object with only the fields we want
         const messageData = {
-            group,
-            message,
-            sender,
-            photoURL,
+            group: group,
+            message: message,
+            sender: sender,
             timestamp: new Date()
         };
-        await addDoc(messagesCollection, messageData);
-        console.log("Message saved to Firestore:", messageData);
+
+        const docRef = await addDoc(messagesCollection, messageData);
+        console.log("Message saved to Firestore with ID:", docRef.id);
+        return messageData;
     } catch (error) {
         console.error("Error saving message:", error);
+        throw error;
     }
 }
 

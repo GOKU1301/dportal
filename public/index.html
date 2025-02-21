@@ -3,123 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat App</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script defer src="script.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-        }
-        #messages {
-            list-style-type: none;
-            padding: 0;
-            margin: 20px 0;
-            height: 400px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            padding: 10px;
-        }
-        .input-group {
-            margin: 10px 0;
-        }
-        input, select, button {
-            padding: 8px;
-            margin: 5px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:disabled {
-            background-color: #cccccc;
-        }
-        .profile-section {
-            display: none;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .profile-image {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
-            background-color: #4CAF50;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-        .message-item {
-            display: flex;
-            align-items: start;
-            margin: 10px 0;
-        }
-        .message-content {
-            margin-left: 10px;
-        }
-        .message-sender {
-            font-weight: bold;
-            margin-bottom: 3px;
-        }
-        #loginSection {
-            text-align: center;
-            margin: 50px 0;
-        }
-        #chatSection {
-            display: none;
-        }
-        .google-btn {
-            background-color: #4285f4;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .google-btn:hover {
-            background-color: #357abd;
-        }
-    </style>
+    <title>Student Chat App</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Add Google Sign-In meta tag -->
+    <meta name="google-signin-client_id" content="YOUR_CLIENT_ID.apps.googleusercontent.com">
 </head>
 <body>
-    <div id="loginSection">
-        <h1>Welcome to Chat App</h1>
-        <button id="googleSignIn" class="google-btn" onclick="signInWithGoogle()">
-            Sign in with Google
-        </button>
+    <div class="container">
+        <!-- Login Section -->
+        <div id="loginSection">
+            <div class="login-container">
+                <h1>Student Chat App</h1>
+                <p style="margin-bottom: 20px;">Connect with your classmates in real-time</p>
+                <button onclick="signInWithGoogle()" class="google-btn">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo" style="width: 20px; height: 20px;">
+                    Sign in with Google
+                </button>
+            </div>
+        </div>
+
+        <!-- Profile Section -->
+        <div id="profileSection">
+            <div class="profile-info">
+                <div id="profileImage"></div>
+                <span id="userName"></span>
+            </div>
+            <button onclick="signOut()" class="sign-out-btn">Sign Out</button>
+        </div>
+
+        <!-- Chat Section -->
+        <div id="chatSection">
+            <div class="chat-header">
+                <select id="groupSelect" onchange="joinGroup()">
+                    <option value="">Select a group...</option>
+                    <option value="general">General</option>
+                    <option value="homework">Homework Help</option>
+                    <option value="projects">Projects</option>
+                    <option value="events">Events</option>
+                </select>
+            </div>
+            
+            <div id="messages"></div>
+            
+            <div class="input-area">
+                <input type="text" id="messageInput" placeholder="Type your message..." disabled
+                    onkeypress="if(event.key === 'Enter') sendMessage()">
+                <button id="sendButton" onclick="sendMessage()" disabled>Send</button>
+            </div>
+        </div>
     </div>
 
-    <div id="chatSection">
-        <div class="profile-section" id="profileSection">
-            <div class="profile-image" id="profileImage"></div>
-            <span id="userName"></span>
-        </div>
-
-        <div class="input-group">
-            <label>Select Group:</label>
-            <select id="groupSelect">
-                <option value="Machine Learning">Machine Learning</option>
-                <option value="Data Structures">Data Structures</option>
-            </select>
-            <button onclick="joinGroup()">Join</button>
-        </div>
-
-        <ul id="messages"></ul>
-
-        <div class="input-group">
-            <input id="messageInput" type="text" placeholder="Type a message..." disabled />
-            <button onclick="sendMessage()" id="sendButton" disabled>Send</button>
-        </div>
-    </div>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    
+    <!-- Socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="script.js"></script>
 </body>
 </html>

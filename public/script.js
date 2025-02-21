@@ -19,10 +19,27 @@ const socket = io();
 let currentUser = null;
 let selectedGroup = "";
 
+// Sign out function
+async function signOut() {
+    try {
+        await auth.signOut();
+        window.location.reload(); // Reload page after sign out
+    } catch (error) {
+        console.error("Error signing out:", error);
+    }
+}
+
 // Google Sign In function
 async function signInWithGoogle() {
     try {
+        // Clear any existing auth state first
+        await auth.signOut();
+        
         const provider = new firebase.auth.GoogleAuthProvider();
+        // Force account selection every time
+        provider.setCustomParameters({
+            prompt: 'select_account'
+        });
         const result = await auth.signInWithPopup(provider);
         console.log("Successfully signed in:", result.user);
     } catch (error) {
@@ -39,7 +56,7 @@ auth.onAuthStateChanged((user) => {
             uid: user.uid,
             name: user.displayName,
             email: user.email,
-            photoURL: user.photoURL
+            photoURL: user.photoURL || null
         };
         
         // Show chat section and hide login
@@ -58,11 +75,18 @@ auth.onAuthStateChanged((user) => {
             profileImage.style.backgroundImage = 'none';
             profileImage.textContent = currentUser.name.charAt(0).toUpperCase();
         }
+
+        // If there was a previously selected group, rejoin it
+        if (selectedGroup) {
+            joinGroup(selectedGroup);
+        }
     } else {
         // Show login section and hide chat
         document.getElementById('loginSection').style.display = 'block';
         document.getElementById('chatSection').style.display = 'none';
+        document.getElementById('profileSection').style.display = 'none';
         currentUser = null;
+        selectedGroup = "";
     }
 });
 
@@ -73,62 +97,50 @@ function joinGroup() {
     const groupSelect = document.getElementById("groupSelect");
     const group = groupSelect.value;
     
+    if (!group) {
+        alert("Please select a group first");
+        return;
+    }
+    
     selectedGroup = group;
     socket.emit("joinGroup", { 
         group, 
-        username: currentUser.name,
-        photoURL: currentUser.photoURL
+        username: currentUser.name
     });
 
     document.getElementById("messageInput").disabled = false;
     document.getElementById("sendButton").disabled = false;
 }
 
-// Receive previous messages when joining a group
-socket.on("groupMessages", (messages) => {
-    const messageList = document.getElementById("messages");
-    messageList.innerHTML = "";
-    messages.forEach(({ message, sender, photoURL }) => appendMessage(sender, message, photoURL));
-});
-
-// Receive new messages
-socket.on("message", ({ message, sender, photoURL }) => {
-    appendMessage(sender, message, photoURL);
-});
-
 // Send a new message
 function sendMessage() {
-    if (!currentUser) return;
+    if (!currentUser || !selectedGroup) return;
     
     const messageInput = document.getElementById("messageInput");
     const message = messageInput.value.trim();
 
     if (message) {
-        socket.emit("sendMessage", {
+        const messageData = {
             group: selectedGroup,
             message,
-            sender: currentUser.name,
-            photoURL: currentUser.photoURL
-        });
+            sender: currentUser.name
+        };
+        
+        socket.emit("sendMessage", messageData);
         messageInput.value = "";
     }
 }
 
 // Append messages to chat
-function appendMessage(sender, message, photoURL) {
+function appendMessage(sender, message) {
     const messageList = document.getElementById("messages");
     const messageItem = document.createElement("div");
     messageItem.className = "message-item";
 
-    // Create profile image/initial
+    // Create profile initial
     const profileDiv = document.createElement("div");
     profileDiv.className = "profile-image";
-    if (photoURL) {
-        profileDiv.style.backgroundImage = `url(${photoURL})`;
-        profileDiv.style.backgroundSize = 'cover';
-    } else {
-        profileDiv.textContent = sender.charAt(0).toUpperCase();
-    }
+    profileDiv.textContent = sender.charAt(0).toUpperCase();
 
     // Create message content
     const contentDiv = document.createElement("div");
@@ -151,6 +163,18 @@ function appendMessage(sender, message, photoURL) {
     messageList.scrollTop = messageList.scrollHeight;
 }
 
+// Receive previous messages when joining a group
+socket.on("groupMessages", (messages) => {
+    const messageList = document.getElementById("messages");
+    messageList.innerHTML = "";
+    messages.forEach(({ message, sender }) => appendMessage(sender, message));
+});
+
+// Receive new messages
+socket.on("message", ({ message, sender }) => {
+    appendMessage(sender, message);
+});
+
 // Handle user joined notification
 socket.on("userJoined", (username) => {
     const messageList = document.getElementById("messages");
@@ -164,4 +188,10 @@ socket.on("userJoined", (username) => {
 
 socket.on("connect", () => {
     console.log("Socket connected:", socket.id); // Log the socket ID
+});
+
+// Handle message error
+socket.on("messageError", ({ error }) => {
+    console.error("Message error:", error);
+    alert("Failed to send message. Please try again.");
 });

@@ -29,11 +29,17 @@ io.on("connection", (socket) => {
     });
 
     // Handle new message
-    socket.on("sendMessage", async ({ group, message, sender }) => {
+    socket.on("sendMessage", async (data) => {
         if (socket.group) {
-            console.log(`Received message: '${message}' from ${sender} in group '${group}'`);
-            await saveMessage(group, message, sender);
-            io.to(socket.group).emit("message", { group, message, sender });
+            try {
+                // Extract only the fields we want to save
+                const { group, message, sender } = data;
+                const savedMessage = await saveMessage(group, message, sender);
+                io.to(socket.group).emit("message", savedMessage);
+            } catch (error) {
+                console.error("Error saving/sending message:", error);
+                socket.emit("messageError", { error: "Failed to send message" });
+            }
         }
     });
 
