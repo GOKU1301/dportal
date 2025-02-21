@@ -8,13 +8,16 @@ const firebaseConfig = {
     appId: "1:1055604134555:web:808b5f8be22453dfc8ac3e"
 };
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+// Initialize Firebase with custom name for this tab
+const firebaseApp = firebase.initializeApp(firebaseConfig, 'app-' + Math.random().toString(36).substring(7));
 
 // Initialize auth and firestore
-const auth = firebase.auth();
-const db = firebase.firestore();
+const auth = firebase.auth(firebaseApp);
+const db = firebase.firestore(firebaseApp);
 const socket = io();
+
+// Set persistence to session (tab-level) instead of local (browser-level)
+auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
 
 let currentUser = null;
 let selectedGroup = "";
@@ -23,18 +26,35 @@ let selectedGroup = "";
 async function signOut() {
     try {
         await auth.signOut();
-        window.location.reload(); // Reload page after sign out
+        // Don't reload the page, just update UI
+        updateUIForSignOut();
     } catch (error) {
         console.error("Error signing out:", error);
     }
 }
 
+// Update UI for sign out without page reload
+function updateUIForSignOut() {
+    document.getElementById('loginSection').style.display = 'block';
+    document.getElementById('chatSection').style.display = 'none';
+    document.getElementById('profileSection').style.display = 'none';
+    currentUser = null;
+    selectedGroup = "";
+    
+    // Clear messages
+    const messageList = document.getElementById("messages");
+    messageList.innerHTML = "";
+    
+    // Reset input
+    const messageInput = document.getElementById("messageInput");
+    messageInput.value = "";
+    messageInput.disabled = true;
+    document.getElementById("sendButton").disabled = true;
+}
+
 // Google Sign In function
 async function signInWithGoogle() {
     try {
-        // Clear any existing auth state first
-        await auth.signOut();
-        
         const provider = new firebase.auth.GoogleAuthProvider();
         // Force account selection every time
         provider.setCustomParameters({
@@ -81,12 +101,7 @@ auth.onAuthStateChanged((user) => {
             joinGroup(selectedGroup);
         }
     } else {
-        // Show login section and hide chat
-        document.getElementById('loginSection').style.display = 'block';
-        document.getElementById('chatSection').style.display = 'none';
-        document.getElementById('profileSection').style.display = 'none';
-        currentUser = null;
-        selectedGroup = "";
+        updateUIForSignOut();
     }
 });
 
