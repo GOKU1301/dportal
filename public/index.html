@@ -5,20 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Chat App</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Add Google Sign-In meta tag -->
-    <meta name="google-signin-client_id" content="YOUR_CLIENT_ID.apps.googleusercontent.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Add Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <!-- Login Section -->
         <div id="loginSection">
             <div class="login-container">
-                <h1>Student Chat App</h1>
-                <p style="margin-bottom: 20px;">Connect with your classmates in real-time</p>
+                <div class="app-logo">
+                    <span class="material-icons">chat</span>
+                </div>
+                <h1>Student Chat</h1>
+                <p>Connect with your classmates in real-time</p>
                 <button onclick="signInWithGoogle()" class="google-btn">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo" style="width: 20px; height: 20px;">
-                    Sign in with Google
+                    <span class="google-icon">G</span>
+                    <span class="btn-text">Sign in with Google</span>
                 </button>
             </div>
         </div>
@@ -29,19 +32,24 @@
                 <div id="profileImage"></div>
                 <span id="userName"></span>
             </div>
-            <button onclick="signOut()" class="sign-out-btn">Sign Out</button>
+            <button onclick="signOut()" class="sign-out-btn">
+                <span class="material-icons">logout</span>
+            </button>
         </div>
 
         <!-- Chat Section -->
         <div id="chatSection">
             <div class="chat-header">
-                <select id="groupSelect" onchange="joinGroup()">
-                    <option value="">Select a group...</option>
-                    <option value="Large Scale Database Systems">Large Scale Database Systems</option>
-                    <option value="OSSD">OSSD</option>
-                    <option value="CBES">CBES</option>
-                    <option value="Data Mining">Data Mining</option>
-                </select>
+                <div class="group-selector">
+                    <span class="material-icons">group</span>
+                    <select id="groupSelect" onchange="joinGroup()">
+                        <option value="">Select a group...</option>
+                        <option value="Large Scale Database Systems">Large Scale Database Systems</option>
+                        <option value="OSSD">OSSD</option>
+                        <option value="CBES">CBES</option>
+                        <option value="Data Mining">Data Mining</option>
+                    </select>
+                </div>
             </div>
             
             <div id="messages"></div>
@@ -49,7 +57,9 @@
             <div class="input-area">
                 <input type="text" id="messageInput" placeholder="Type your message..." disabled
                     onkeypress="if(event.key === 'Enter') sendMessage()">
-                <button id="sendButton" onclick="sendMessage()" disabled>Send</button>
+                <button id="sendButton" onclick="sendMessage()" disabled>
+                    <span class="material-icons">send</span>
+                </button>
             </div>
         </div>
     </div>

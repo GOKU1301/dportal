@@ -11,8 +11,14 @@ const firebaseConfig = {
 // Initialize Firebase with custom name for this tab
 const firebaseApp = firebase.initializeApp(firebaseConfig, 'app-' + Math.random().toString(36).substring(7));
 
-// Initialize auth and firestore
+// Initialize auth and firestore with development settings
 const auth = firebase.auth(firebaseApp);
+auth.useDeviceLanguage();
+// Enable HTTP for development
+if (window.location.hostname === 'localhost' || window.location.hostname.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+    auth.settings.appVerificationDisabledForTesting = true;
+}
+
 const db = firebase.firestore(firebaseApp);
 const socket = io();
 
@@ -55,6 +61,10 @@ function updateUIForSignOut() {
 // Google Sign In function
 async function signInWithGoogle() {
     try {
+        console.log("Starting Google sign-in process...");
+        console.log("Current hostname:", window.location.hostname);
+        console.log("Current origin:", window.location.origin);
+        
         const provider = new firebase.auth.GoogleAuthProvider();
         // Force account selection every time
         provider.setCustomParameters({
@@ -64,7 +74,32 @@ async function signInWithGoogle() {
         console.log("Successfully signed in:", result.user);
     } catch (error) {
         console.error("Error signing in with Google:", error);
-        alert("Error signing in with Google. Please try again.");
+        console.error("Error code:", error.code);
+        console.error("Error message:", error.message);
+        if (error.email) console.error("Error email:", error.email);
+        if (error.credential) console.error("Error credential:", error.credential);
+        
+        let errorMessage = "Error signing in with Google. ";
+        
+        // Add specific error messages based on error code
+        switch (error.code) {
+            case 'auth/popup-blocked':
+                errorMessage += "Please allow popups for this website.";
+                break;
+            case 'auth/popup-closed-by-user':
+                errorMessage += "Sign-in popup was closed before completing.";
+                break;
+            case 'auth/unauthorized-domain':
+                errorMessage += "This domain is not authorized for Google sign-in. Current origin: " + window.location.origin;
+                break;
+            case 'auth/operation-not-supported-in-this-environment':
+                errorMessage += "Authentication not supported in this environment. Try using HTTPS or add this domain to Firebase authorized domains.";
+                break;
+            default:
+                errorMessage += error.message || "Please try again.";
+        }
+        
+        alert(errorMessage);
     }
 }
 
@@ -152,10 +187,9 @@ function appendMessage(sender, message) {
     const messageItem = document.createElement("div");
     messageItem.className = "message-item";
 
-    // Create profile initial
-    const profileDiv = document.createElement("div");
-    profileDiv.className = "profile-image";
-    profileDiv.textContent = sender.charAt(0).toUpperCase();
+    // Add class for sent/received messages
+    const isSentMessage = sender === currentUser?.name;
+    messageItem.classList.add(isSentMessage ? 'sent' : 'received');
 
     // Create message content
     const contentDiv = document.createElement("div");
@@ -163,15 +197,14 @@ function appendMessage(sender, message) {
     
     const senderDiv = document.createElement("div");
     senderDiv.className = "message-sender";
-    senderDiv.textContent = sender;
+    senderDiv.textContent = isSentMessage ? 'You' : sender;
     
     const messageText = document.createElement("div");
+    messageText.className = "message-text";
     messageText.textContent = message;
 
     contentDiv.appendChild(senderDiv);
     contentDiv.appendChild(messageText);
-    
-    messageItem.appendChild(profileDiv);
     messageItem.appendChild(contentDiv);
     
     messageList.appendChild(messageItem);
