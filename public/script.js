@@ -27,6 +27,7 @@ auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
 
 let currentUser = null;
 let selectedGroup = "";
+let selectedSubgroup = "";
 
 // Sign out function
 async function signOut() {
@@ -46,6 +47,7 @@ function updateUIForSignOut() {
     document.getElementById('profileSection').style.display = 'none';
     currentUser = null;
     selectedGroup = "";
+    selectedSubgroup = "";
     
     // Clear messages
     const messageList = document.getElementById("messages");
@@ -133,28 +135,56 @@ auth.onAuthStateChanged((user) => {
 
         // If there was a previously selected group, rejoin it
         if (selectedGroup) {
-            joinGroup(selectedGroup);
+            joinGroup();
         }
     } else {
         updateUIForSignOut();
     }
 });
 
+// Handle group change
+function handleGroupChange() {
+    const groupSelect = document.getElementById("groupSelect");
+    const subgroupSelect = document.getElementById("subgroupSelect");
+    
+    if (groupSelect.value) {
+        subgroupSelect.disabled = false;
+        selectedGroup = groupSelect.value;
+        // Reset subgroup selection
+        subgroupSelect.value = "";
+        selectedSubgroup = "";
+        document.getElementById("messageInput").disabled = true;
+        document.getElementById("sendButton").disabled = true;
+        document.getElementById("messages").innerHTML = "";
+    } else {
+        subgroupSelect.disabled = true;
+        selectedGroup = "";
+        selectedSubgroup = "";
+        document.getElementById("messageInput").disabled = true;
+        document.getElementById("sendButton").disabled = true;
+    }
+}
+
 // Join a group
 function joinGroup() {
     if (!currentUser) return;
     
     const groupSelect = document.getElementById("groupSelect");
+    const subgroupSelect = document.getElementById("subgroupSelect");
     const group = groupSelect.value;
+    const subgroup = subgroupSelect.value;
     
-    if (!group) {
-        alert("Please select a group first");
+    if (!group || !subgroup) {
+        alert("Please select both a group and subgroup first");
         return;
     }
     
     selectedGroup = group;
+    selectedSubgroup = subgroup;
+    
     socket.emit("joinGroup", { 
         group, 
+        subgroup,
         username: currentUser.name
     });
 
@@ -164,7 +194,7 @@ function joinGroup() {
 
 // Send a new message
 function sendMessage() {
-    if (!currentUser || !selectedGroup) return;
+    if (!currentUser || !selectedGroup || !selectedSubgroup) return;
     
     const messageInput = document.getElementById("messageInput");
     const message = messageInput.value.trim();
@@ -172,6 +202,7 @@ function sendMessage() {
     if (message) {
         const messageData = {
             group: selectedGroup,
+            subgroup: selectedSubgroup,
             message,
             sender: currentUser.name
         };
@@ -227,10 +258,8 @@ socket.on("message", ({ message, sender }) => {
 socket.on("userJoined", (username) => {
     const messageList = document.getElementById("messages");
     const messageElement = document.createElement("div");
-    messageElement.style.textAlign = "center";
-    messageElement.style.fontStyle = "italic";
-    messageElement.style.margin = "10px 0";
-    messageElement.textContent = `${username} has joined the group.`;
+    messageElement.className = "system-message";
+    messageElement.textContent = `${username} has joined the ${selectedSubgroup} subgroup.`;
     messageList.appendChild(messageElement);
 });
 

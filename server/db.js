@@ -3,21 +3,36 @@ const { db } = require("./firebaseConfig");
 
 const messagesCollection = collection(db, "messages");
 
-async function getMessages(group) {
+async function getMessages(group, subgroup) {
     if (!group) {
         console.error("Invalid group name for fetching messages.");
         return [];
     }
 
     try {
-        const q = query(messagesCollection, where("group", "==", group), orderBy("timestamp", "asc"));
+        let q;
+        if (subgroup) {
+            q = query(
+                messagesCollection, 
+                where("group", "==", group),
+                where("subgroup", "==", subgroup),
+                orderBy("timestamp", "asc")
+            );
+        } else {
+            q = query(
+                messagesCollection,
+                where("group", "==", group),
+                orderBy("timestamp", "asc")
+            );
+        }
+        
         const snapshot = await getDocs(q);
 
-        // Map only the fields we want to return
         const messages = snapshot.docs.map(doc => {
             const data = doc.data();
             return {
                 group: data.group,
+                subgroup: data.subgroup,
                 message: data.message,
                 sender: data.sender,
                 timestamp: data.timestamp
@@ -32,16 +47,16 @@ async function getMessages(group) {
     }
 }
 
-async function saveMessage(group, message, sender) {
-    if (!group || !message || !sender) {
+async function saveMessage(group, subgroup, message, sender) {
+    if (!group || !message || !sender || !subgroup) {
         console.error("Missing required fields for saving message");
         throw new Error("Missing required fields");
     }
 
     try {
-        // Explicitly create message object with only the fields we want
         const messageData = {
             group: group,
+            subgroup: subgroup,
             message: message,
             sender: sender,
             timestamp: new Date()

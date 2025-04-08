@@ -172,7 +172,7 @@ body {
     gap: 15px;
 }
 
-#groupSelect {
+#groupSelect, #subgroupSelect {
     background: transparent;
     color: white;
     border: none;
@@ -183,9 +183,14 @@ body {
     width: 250px;
 }
 
-#groupSelect option {
+#groupSelect option, #subgroupSelect option {
     background: white;
     color: var(--text-color);
+}
+
+#subgroupSelect:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* Messages Container */

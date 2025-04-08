@@ -42,12 +42,18 @@
             <div class="chat-header">
                 <div class="group-selector">
                     <span class="material-icons">group</span>
-                    <select id="groupSelect" onchange="joinGroup()">
+                    <select id="groupSelect" onchange="handleGroupChange()">
                         <option value="">Select a group...</option>
                         <option value="Large Scale Database Systems">Large Scale Database Systems</option>
                         <option value="OSSD">OSSD</option>
                         <option value="CBES">CBES</option>
                         <option value="Data Mining">Data Mining</option>
+                    </select>
+                    <select id="subgroupSelect" onchange="joinGroup()" disabled>
+                        <option value="">Select a subgroup...</option>
+                        <option value="tutorials">Tutorials</option>
+                        <option value="pyq">Previous Year Questions</option>
+                        <option value="discussion">Discussion</option>
                     </select>
                 </div>
             </div>

@@ -13,29 +13,31 @@ io.on("connection", (socket) => {
     console.log("A user connected");
 
     // Join group and send previous messages
-    socket.on("joinGroup", async ({ group, username }) => {
-        socket.join(group);
+    socket.on("joinGroup", async ({ group, subgroup, username }) => {
+        const roomId = subgroup ? `${group}-${subgroup}` : group;
+        socket.join(roomId);
         socket.group = group;
+        socket.subgroup = subgroup;
         socket.username = username;
 
-        console.log(`User ${username} joined group: ${group}`);
+        console.log(`User ${username} joined group: ${group}, subgroup: ${subgroup}`);
         
         // Send old messages to user
-        const messages = await getMessages(group);
+        const messages = await getMessages(group, subgroup);
         socket.emit("groupMessages", messages);
 
         // Notify other users in the group
-        socket.to(group).emit("userJoined", username);
+        socket.to(roomId).emit("userJoined", username);
     });
 
     // Handle new message
     socket.on("sendMessage", async (data) => {
         if (socket.group) {
             try {
-                // Extract only the fields we want to save
-                const { group, message, sender } = data;
-                const savedMessage = await saveMessage(group, message, sender);
-                io.to(socket.group).emit("message", savedMessage);
+                const { group, subgroup, message, sender } = data;
+                const savedMessage = await saveMessage(group, subgroup, message, sender);
+                const roomId = subgroup ? `${group}-${subgroup}` : group;
+                io.to(roomId).emit("message", savedMessage);
             } catch (error) {
                 console.error("Error saving/sending message:", error);
                 socket.emit("messageError", { error: "Failed to send message" });
