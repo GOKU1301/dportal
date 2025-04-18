@@ -15,10 +15,10 @@
         <div id="loginSection">
             <div class="login-container">
                 <div class="app-logo">
-                    <span class="material-icons">chat</span>
+                    <span class="material-icons">forum</span>
                 </div>
                 <h1>Student Chat</h1>
-                <p>Connect with your classmates in real-time</p>
+                <p>Connect with your classmates and share resources in real-time</p>
                 <button onclick="signInWithGoogle()" class="google-btn">
                     <span class="google-icon">G</span>
                     <span class="btn-text">Sign in with Google</span>
@@ -32,35 +32,44 @@
                 <div id="profileImage"></div>
                 <span id="userName"></span>
             </div>
-            <button onclick="signOut()" class="sign-out-btn">
-                <span class="material-icons">logout</span>
-            </button>
+            <div class="profile-actions">
+                <button onclick="signOut()" class="sign-out-btn" title="Sign Out">
+                    <span class="material-icons">logout</span>
+                </button>
+            </div>
         </div>
 
         <!-- Chat Section -->
         <div id="chatSection">
             <div class="chat-header">
                 <div class="group-selector">
-                    <span class="material-icons">group</span>
+                    <span class="material-icons">school</span>
                     <select id="groupSelect" onchange="handleGroupChange()">
-                        <option value="">Select a group...</option>
+                        <option value="">Select a course...</option>
                         <option value="Large Scale Database Systems">Large Scale Database Systems</option>
-                        <option value="OSSD">OSSD</option>
-                        <option value="CBES">CBES</option>
+                        <option value="OSSD">Open Source Software Development</option>
+                        <option value="CBES">Cloud-Based Enterprise Systems</option>
                         <option value="Data Mining">Data Mining</option>
                     </select>
                     <select id="subgroupSelect" onchange="joinGroup()" disabled>
-                        <option value="">Select a subgroup...</option>
+                        <option value="">Select a channel...</option>
                         <option value="tutorials">Tutorials</option>
                         <option value="pyq">Previous Year Questions</option>
                         <option value="discussion">Discussion</option>
                     </select>
+                </div>
+                <div class="active-users">
+                    <span class="material-icons">people</span>
+                    <span id="activeUserCount">0</span>
                 </div>
             </div>
             
             <div id="messages"></div>
             
             <div class="input-area">
+                <button id="attachButton" title="Attach files" disabled>
+                    <span class="material-icons">attach_file</span>
+                </button>
                 <input type="text" id="messageInput" placeholder="Type your message..." disabled
                     onkeypress="if(event.key === 'Enter') sendMessage()">
                 <button id="sendButton" onclick="sendMessage()" disabled>
