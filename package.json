@@ -1,9 +1,9 @@
 {
   "name": "student-chat-app",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "api/index.js",
   "scripts": {
-    "start": "node server/server.js",
+    "start": "node api/index.js",
     "dev": "nodemon server/server.js"
   },
   "keywords": [],

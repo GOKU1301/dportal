@@ -1,15 +1,27 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const path = require("path");
 const { saveMessage, getMessages } = require("./db");
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
 
-app.use(express.static("public"));
+// Only create server if not running on Vercel
+const isVercel = process.env.VERCEL === '1';
+const server = isVercel ? null : http.createServer(app);
+const io = isVercel ? null : new Server(server);
 
-io.on("connection", (socket) => {
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, '../public')));
+
+// Default route
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
+// Only setup socket.io if not running on Vercel
+if (!isVercel && io) {
+  io.on("connection", (socket) => {
     console.log("A user connected");
 
     // Join group and send previous messages
@@ -48,11 +60,18 @@ io.on("connection", (socket) => {
     socket.on("disconnect", () => {
         console.log("A user disconnected");
     });
-});
+  });
+}
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`Access locally via http://localhost:${PORT}`);
-    console.log(`Other devices on your network can access via http://<your-ip-address>:${PORT}`);
-}); 
+// Only start server if not on Vercel
+if (!isVercel && server) {
+  const PORT = process.env.PORT || 3000;
+  server.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server running on port ${PORT}`);
+      console.log(`Access locally via http://localhost:${PORT}`);
+      console.log(`Other devices on your network can access via http://<your-ip-address>:${PORT}`);
+  });
+}
+
+// Export app for Vercel
+module.exports = app; 
