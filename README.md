@@ -1,4 +1,4 @@
-# Student Chat Application
+# RealTime Chat Application
 
 A real-time chat application designed for students to communicate with each other. Built with Node.js, Express, Socket.IO, and Firebase.
 
